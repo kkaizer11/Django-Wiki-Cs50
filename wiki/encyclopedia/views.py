@@ -1,4 +1,5 @@
 from django.shortcuts import render 
+from random import randint
 
 from . import util
 from markdown2 import markdown
@@ -7,10 +8,10 @@ from markdown2 import markdown
 
 
 def index(request):
-    content = {
+    context = {
         "entries": util.list_entries(),
     }
-    return render(request, "encyclopedia/index.html", content)
+    return render(request, "encyclopedia/index.html", context)
 
 
 def wiki_Entry(request, title):
@@ -19,11 +20,11 @@ def wiki_Entry(request, title):
         return render(request, "encyclopedia/error.html")
     else:
         entry_content = markdown(entry)
-        content = {
+        context = {
             "title": title,
             "entry_md": entry_content,
         }
-        return render(request, "encyclopedia/entries.html", content)
+        return render(request, "encyclopedia/entries.html", context)
 
 
 def search(request):
@@ -52,3 +53,12 @@ def search(request):
         "feedback": feedback,
     }
     return render(request ,"encyclopedia/search.html", context)
+
+def randomPage(request):
+    ls_entries = util.list_entries()
+    rd_entry = ls_entries[randint(0, len(ls_entries)-1)]
+    context = {
+        "title": rd_entry,
+        "entry_md":markdown(util.get_entry(rd_entry)),
+    }
+    return render(request, "encyclopedia/entries.html", context)
