@@ -1,7 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render 
 
 from . import util
 from markdown2 import markdown
+
+
 
 
 def index(request):
@@ -25,17 +27,28 @@ def wiki_Entry(request, title):
 
 
 def search(request):
-    query = request.POST["query"]
+    query = request.POST["q"]
     ls_entries = util.list_entries()
-    result = []
+    feedback = []
+    no_result = False
     for i in range(len(ls_entries)):
         if query.lower() == ls_entries[i].lower():
-            return redirect("wiki_Entry", title=ls_entries[i])
+            return render(request, "encyclopedia/entries.html", {
+                "title": ls_entries[i],
+                "entry_md": markdown(util.get_entry(ls_entries[i]))
+            })
         elif query.lower() in ls_entries[i].lower():
-            result.append(ls_entries[i])
-    content = {
-        "title": "Search results",
+            feedback.append(ls_entries[i])
+    if len(feedback) == 1:
+        return render(request, "encyclopedia/entries.html", {
+            "title": feedback[0],
+                      "entry_md" : markdown(util.get_entry(feedback[0]))
+            })
+    elif len(feedback) == 0:
+        no_result = True
+    context = {
+        "no_result": no_result,
         "query": query,
-        "feedback": result,
+        "feedback": feedback,
     }
-    return render(request, "encyclopedia/search.html", content)
+    return render(request ,"encyclopedia/search.html", context)
